@@ -1,0 +1,30 @@
+{
+  "name": "chemical-bulletins",
+  "version": "1.0.0",
+  "description": "Unofficial package to request information about chemical bulletins from the SUNAT website",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/HerbertVidela/chemical-bulletins.git"
+  },
+  "keywords": [
+    "sunat",
+    "unofficial",
+    "chemical",
+    "bulletins",
+    "newsletters"
+  ],
+  "author": "Herbert Videla",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/HerbertVidela/chemical-bulletins/issues"
+  },
+  "homepage": "https://github.com/HerbertVidela/chemical-bulletins#readme",
+  "dependencies": {
+    "node-html-parser": "^1.1.16",
+    "request": "^2.88.0"
+  }
+}
