@@ -30,13 +30,29 @@ const chemicalTitles = ['customAgency', 'customEmployee', 'chemicalInform', 'com
  */
 
 /**
+ * @typedef {Object} OptionsParams
+ * @property {function} parser - A custom parser for the returned html body
+ *
+ */
+
+/*
+ * @typedef {Object} SearchedBulletin
+ * @property {string} bulletinNumber - The bulleting searched, the string should have a length of 6 characters
+ * @property {string} year - Like 2019, 2018, etc
+ *
+ *
+	* */
+
+const areParamsEmpty = params => params.bulletinNumber && params.year;
+
+
+/**
  * Default parser of the returned body
  * @function
  * @param {HTMLObject} table
  * @returns {ChemicalBolletinCell[]}
  *
  */
-
 const parseTable = table => Object.values(
 	table.querySelectorAll('.gamma')
 		.reduce(
@@ -64,41 +80,80 @@ const parseBody = body => {
 	return parsedBody;
 }
 
-/**
- * @async
- * @function
- * @param {Object} params
- * @param {string} params.chemicalBulletinNumber - The string should have a length of 6 
- * @param {string} params.year - Like 2019, 2018, etc
- * @param {Object} options
- * @param {Function} options.parser Custom parse defined by the user
- * @return {ChemicalBoletin} All the information of the chemical bulletin parsed into an object
- */
-const getChemicalBulletins = ({ chemicalBulletinNumber, year, options = {} }) => 
+const requestChemicalBulletin = (
+	{ bulletinNumber, year },
+	options = {}
+) =>
 	new Promise((resolve, reject) => {
-		request({ url: cookieURI }, (cookieError) => {
-			if (cookieError) {
-				reject(cookieError);
+		request.post({
+			url: baseURI,
+			form: {
+				...basicFormStructure,
+				num_bolQuim: bulletinNumber,
+				anno: year,
+			},
+		}, (searchError, _, body) => {
+			if (searchError) {
+				reject(searchError);
 			} else {
-				request.post({
-					url: baseURI,
-					form: {
-						...basicFormStructure,
-						num_bolQuim: chemicalBulletinNumber,
-						anno: year,
-					},
-				}, (searchError, _, body) => {
-					if (searchError) {
-						reject(searchError);
-					} else {
-						const parser = options.parser || parseBody;
-						const parsedBody = parser(body);
+				const parser = options.parser || parseBody;
+				const parsedBody = parser(body);
 
-						resolve({ body: parsedBody });
-					}
-				});
+				resolve({ body: parsedBody });
 			}
 		});
 	});
 
-module.exports = getChemicalBulletins;
+/**
+ * @function
+ * @param {SearchedBulletin} params
+ * @param {OptionsParams} options
+ * @return {Promise} A Promise of all the information of the chemical bulletin parsed into an object
+ */
+const getChemicalBulletin = (params = {}, options = {}) => {
+	if (areParamsEmpty(params)) {
+		throw Error('Yoy need to provide at least a bulletin number and a search year');
+	}
+
+	return new Promise((resolve, reject) => {
+		request({ url: cookieURI }, (cookieError) => {
+			if (cookieError) {
+				reject(cookieError);
+			} else {
+				resolve(requestChemicalBulletin(params, options));
+			}
+		});
+	});
+}
+
+/**
+ * @function
+ * @param {SearchedBulletin[]} searchedBulletins
+ * @param {OptionsParams} options
+ * @return {Promise} A Promise of all of the chemical bulletins parsed into an object
+ */
+const getChemicalBulletins = (searchedBulletins, options) => {
+	if(searchedBulletins.length < 1) {
+		throw Error('You need to search for at least one bulletin');
+	}
+	const filteredElements = searchedBulletins.filter(elem => areParamsEmpty(elem));
+
+	if (filteredElements.length < 1) {
+		throw Error('You need to search for at least one valid bulletin');
+	}
+
+	return new Promise((resolve, reject) => {
+		request({ url: cookieURI }, (cookieError) => {
+			if (cookieError) {
+				reject(cookieError);
+			} else {
+				resolve(Promise.all(filteredElements.map(elem => requestChemicalBulletin(elem, options))));
+			}
+		});
+	});
+}
+
+module.exports = {
+	getChemicalBulletin,
+	getChemicalBulletins,
+};
