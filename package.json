@@ -1,6 +1,6 @@
 {
   "name": "chemical-bulletins",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Unofficial package to request information about chemical bulletins from the SUNAT website",
   "main": "index.js",
   "scripts": {
