@@ -3,9 +3,9 @@ Unofficial package for make request to SUNAT public information about chemical b
 
 ## Methods
 
-### getChemicalBulletin({ bulletinNumber: string, year: string }, options) => ChemicalBulletin 
+`getChemicalBulletin({ bulletinNumber: string, year: string }, options) => ChemicalBulletin`
 
-### getChemicalBulletins([{ bulletinNumber: string, year: string }], options) => ChemicalBulletin[]
+`getChemicalBulletins([{ bulletinNumber: string, year: string }], options) => ChemicalBulletin[]`
 
 For both methods the formatting for the bulletinNumber should be 'XXXXXX' where each X could be a value between 0 and 9 and it must have a length of 6.
 e.g. '000001', '000101', etc.
